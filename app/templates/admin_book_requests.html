@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Book Requests</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        table {
+            width: 80%;
+            border-collapse: collapse;
+            margin: 0 auto;
+            table-layout: fixed;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+            word-wrap: break-word;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        tr {
+            height: 30px;
+        }
+        th:nth-child(1), td:nth-child(1) {
+            width: 15%;
+        }
+        th:nth-child(2), td:nth-child(2) {
+            width: 20%;
+        }
+        th:nth-child(3), td:nth-child(3) {
+            width: 10%;
+        }
+        th:nth-child(4), td:nth-child(4),
+        th:nth-child(5), td:nth-child(5) {
+            width: 10%;
+        }
+        th:nth-child(6), td:nth-child(6) {
+            width: 15%;
+        }
+        .btn-approve, .btn-deny {
+            padding: 5px 10px;
+            text-decoration: none;
+            color: white;
+            border-radius: 3px;
+            font-size: 12px;
+            display: inline-block;
+            margin: 2px;
+        }
+        .btn-approve {
+            background-color: green;
+        }
+        .btn-deny {
+            background-color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Pending Book Requests</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>User ID</th>
+                <th>Book Name</th>
+                <th>Available Copies</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Approve</th>
+
+            </tr>
+        </thead>
+        <tbody>
+    {% for request in requests %}
+    <tr>
+        <td>{{ request.user_id }}</td>
+        <td>{{ request.book_name }}</td>
+        <td>{{ request.book_available }}</td>
+        <td>{{ request.start_date }}</td>
+        <td>{{ request.end_date }}</td>
+        <td>
+    <form action="{{ url_for('Library.approve_request',request=request) }}" method="post">
+        <input type="hidden" name="request_id" value="{{ request.id }}">
+        <button type="submit" class="btn-approve">Approve</button>
+    </form>
+        </td>
+
+    </tr>
+    {% endfor %}
+</tbody>
+
+    </table>
+</body>
+</html>

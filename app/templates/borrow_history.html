@@ -1,0 +1,73 @@
+<!-- borrow_history.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Borrow History</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f8f9fa;
+        }
+        h1 {
+            text-align: center;
+            color: #343a40;
+        }
+        table {
+            width: 70%;
+            border-collapse: collapse;
+            margin: 20px auto;
+        }
+        th, td {
+            padding: 8px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        .message {
+            color: red;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Borrow History</h1>
+    {% if history_records %}
+        <table>
+            <thead>
+                <tr>
+                    <th>User ID</th>
+                    <th>Book ID</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Returned Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in history_records %}
+                    <tr>
+                        <td>{{ record.user_id }}</td>
+                        <td>{{ record.book_id }}</td>
+                        <td>{{ record.start_date }}</td>
+                        <td>{{ record.end_date }}</td>
+                        <td>{{ record.returned_date if record.returned_date else 'Not Returned' }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="message">No borrow history found.</p>
+    {% endif %}
+</body>
+</html>

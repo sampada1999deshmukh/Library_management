@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            width: 80%;
+            max-width: 800px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .options-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            width: 100%; /* Ensure full width for the grid */
+        }
+        .option-box {
+            background-color: #007bff;
+            color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-decoration: none; /* Remove underline */
+        }
+        .option-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        .option-box i {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+        .option-box p {
+            font-size: 18px;
+            margin: 0;
+        }
+        .borrow-history {
+            grid-column: span 2;
+            display: flex;
+            justify-content: center;
+        }
+        .logout-btn {
+            margin-top: 30px;
+            padding: 10px 20px;
+            background-color: #ff4b5c;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .logout-btn:hover {
+            background-color: #e0434e;
+        }
+        @media (max-width: 600px) {
+            .options-container {
+                grid-template-columns: 1fr;
+            }
+            .borrow-history {
+                grid-column: span 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Admin Dashboard</h1>
+
+        <div class="options-container">
+            <a href="{{ url_for('Library.add_book_view') }}" class="option-box">
+                <i class="fa fa-book"></i>
+                <p>Add Book</p>
+            </a>
+            <a href="{{ url_for('Library.admin_book_requests') }}" class="option-box">
+                <i class="fa fa-list-alt"></i>
+                <p>See Requests</p>
+            </a>
+            <a href="{{url_for('Library.borrow_history')}}" class="option-box borrow-history">
+                <i class="fa fa-history"></i>
+                <p>Borrow History</p>
+            </a>
+        </div>
+
+        <button class="logout-btn" onclick="window.location.href='{{ url_for('Library.logout') }}'">Logout</button>
+    </div>
+</body>
+</html>
