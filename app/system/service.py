@@ -55,9 +55,9 @@ def get_all_books():
         books = Books.query.all()
         return [
             {
-                'id': book.book_id,
-                'name': book.name,
                 'author': book.author,
+                'name': book.name,
+                'book_id': book.book_id,
                 'isbn': book.isbn,
                 'available_copies': book.available_copies
             }
@@ -66,7 +66,6 @@ def get_all_books():
     except Exception as e:
         flash(f'An error occurred while retrieving books: {e}', 'error')
         return []
-
 
 
 def process_borrow_request(user_id, book_data, start_date, end_date):
@@ -108,13 +107,13 @@ def add_book_request(user_id, book_id, start_date, end_date):
             end_date=end_date,
             status="Pending"
         )
-
         db.session.add(new_request)
         db.session.commit()
         return "Book request submitted successfully.", 200
     except Exception as e:
         db.session.rollback()
         return f"Error: Could not submit book request. {str(e)}", 500
+
 def fetch_pending_book_requests():
     try:
         requests = BorrowRequest.query.all()
@@ -137,46 +136,72 @@ def fetch_pending_book_requests():
 
 
 def approve_book_request(data):
-    try:
-        book_request = BorrowRequest.query.filter_by(user_id=data['user_id'], book_id=data['book_id']).first()
-        if not book_request:
-            return "Request not found."
-        if book_request.status == "Approved":
-            return "This book request has already been approved."
-        book_data = Books.query.filter_by(book_id=data['book_id']).first()
-        if not book_data:
-            return "Book not found."
-        if book_data.available_copies <= 0:
-            return "No copies of the book are currently available."
-        overlapping_request = BorrowRequest.query.filter(
-            BorrowRequest.book_id == data['book_id'],
-            BorrowRequest.start_date < data['end_date'],
-            BorrowRequest.end_date > data['start_date'],
-            BorrowRequest.status == "Approved"
-        ).first()
-        if overlapping_request:
-            return "Overlapping borrow dates detected."
+    book_request = BorrowRequest.query.filter_by(user_id=data['user_id'], book_id=data['book_id']).first()
+    if not book_request:
+        return "Request not found."
 
-        book_data.available_copies -= 1
+    if book_request.status == "Approved":
+        return "This book request has already been approved."
+
+    book_data = Books.query.filter_by(book_id=data['book_id']).first()
+    if not book_data:
+        return "Book not found."
+
+    if book_data.available_copies <= 0:
+        return "No copies of the book are currently available."
+
+    overlapping_request = BorrowRequest.query.filter(
+        BorrowRequest.book_id == data['book_id'],
+        BorrowRequest.start_date < data['end_date'],
+        BorrowRequest.end_date > data['start_date'],
+        BorrowRequest.status == "Approved"
+    ).first()
+
+    if overlapping_request:
+        return "Overlapping borrow dates detected."
+
+    book_data.available_copies -= 1
+    db.session.add(book_data)
+    try:
         db.session.commit()
-        book_request.status = "Approved"
-        db.session.commit()
-        borrow_history = BorrowHistory(
-            user_id=data['user_id'],
-            book_id=data['book_id'],
-            start_date=book_request.start_date,
-            end_date=book_request.end_date,
-            returned_date=None
-        )
-        db.session.add(borrow_history)
-        db.session.commit()
-        db.session.delete(book_request)
-        db.session.commit()
-        return "The book request has been approved successfully."
     except Exception as e:
         db.session.rollback()
-        flash(f'An error occurred while approving the book request: {e}', 'error')
-        return "An error occurred while processing the request."
+        return f"Error while committing book data: {str(e)}"
+
+    book_request.status = "Approved"
+    db.session.add(book_request)
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return f"Error while committing borrow request status: {str(e)}"
+
+    updated_request = BorrowRequest.query.filter_by(user_id=data['user_id'], book_id=data['book_id']).first()
+    print(f"Updated Request Status: {updated_request.status}")
+
+    borrow_history = BorrowHistory(
+        user_id=data['user_id'],
+        book_id=data['book_id'],
+        start_date=book_request.start_date,
+        end_date=book_request.end_date,
+        status=updated_request,
+        returned_date=None
+    )
+    try:
+        db.session.add(borrow_history)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return f"Error while committing borrow history: {str(e)}"
+
+    try:
+        db.session.delete(book_request)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return f"Error while deleting the borrow request: {str(e)}"
+
+    return "The book request has been approved successfully."
 
 
 def get_borrow_history(user_id):
