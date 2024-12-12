@@ -177,8 +177,6 @@ def approve_book_request(data):
         return f"Error while committing borrow request status: {str(e)}"
 
     updated_request = BorrowRequest.query.filter_by(user_id=data['user_id'], book_id=data['book_id']).first()
-    print(f"Updated Request Status: {updated_request.status}")
-
     borrow_history = BorrowHistory(
         user_id=data['user_id'],
         book_id=data['book_id'],
